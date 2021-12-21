@@ -40,7 +40,7 @@ ngx_rbtree_insert(ngx_rbtree_t *tree, ngx_rbtree_node_t *node)
 
         return;
     }
-
+    // 调用插入回调函数，将节点node插入红黑树，插入节点设为红色
     tree->insert(*root, node, sentinel);
 
     /* re-balance tree */
@@ -117,7 +117,10 @@ ngx_rbtree_insert_value(ngx_rbtree_node_t *temp, ngx_rbtree_node_t *node,
     ngx_rbt_red(node);
 }
 
-
+/*
+ * 使用二级指针p的优点：不需要单独设置parent的child
+ * 外层保证temp不是哨兵（根节点不是哨兵才调用insert）
+*/
 void
 ngx_rbtree_insert_timer_value(ngx_rbtree_node_t *temp, ngx_rbtree_node_t *node,
     ngx_rbtree_node_t *sentinel)
@@ -134,7 +137,7 @@ ngx_rbtree_insert_timer_value(ngx_rbtree_node_t *temp, ngx_rbtree_node_t *node,
          */
 
         /*  node->key < temp->key */
-
+        // 时间戳是unsigned，相减可能会溢出，故强转为signed
         p = ((ngx_rbtree_key_int_t) (node->key - temp->key) < 0)
             ? &temp->left : &temp->right;
 
