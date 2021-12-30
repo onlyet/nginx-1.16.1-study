@@ -1896,7 +1896,12 @@ ngx_escape_json(u_char *dst, u_char *src, size_t size)
     return (uintptr_t) dst;
 }
 
-
+/** 
+ * 比较顺序：
+ * 第一，比较关键字key（字符串对应hash）
+ * 第二，比较字符串长度
+ * 第三，比较字符串内容
+*/
 void
 ngx_str_rbtree_insert_value(ngx_rbtree_node_t *temp,
     ngx_rbtree_node_t *node, ngx_rbtree_node_t *sentinel)

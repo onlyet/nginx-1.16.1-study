@@ -120,6 +120,8 @@ ngx_rbtree_insert_value(ngx_rbtree_node_t *temp, ngx_rbtree_node_t *node,
 /*
  * 使用二级指针p的优点：不需要单独设置parent的child
  * 外层保证temp不是哨兵（根节点不是哨兵才调用insert）
+ * 
+ * node 插入节点
 */
 void
 ngx_rbtree_insert_timer_value(ngx_rbtree_node_t *temp, ngx_rbtree_node_t *node,
@@ -155,7 +157,13 @@ ngx_rbtree_insert_timer_value(ngx_rbtree_node_t *temp, ngx_rbtree_node_t *node,
     ngx_rbt_red(node);
 }
 
-
+/** 
+ * node 想要删除的节点
+ * subst 实际删除的节点
+ * 
+ * 
+ * w 兄弟节点
+*/
 void
 ngx_rbtree_delete(ngx_rbtree_t *tree, ngx_rbtree_node_t *node)
 {
@@ -179,6 +187,7 @@ ngx_rbtree_delete(ngx_rbtree_t *tree, ngx_rbtree_node_t *node)
         subst = ngx_rbtree_min(node->right, sentinel);
 
         if (subst->left != sentinel) {
+            // 什么时候走到这？
             temp = subst->left;
         } else {
             temp = subst->right;
@@ -212,8 +221,8 @@ ngx_rbtree_delete(ngx_rbtree_t *tree, ngx_rbtree_node_t *node)
         temp->parent = subst->parent;
 
     } else {
-
         if (subst->parent == node) {
+            // 什么时候走到这？
             temp->parent = subst;
 
         } else {
@@ -262,18 +271,21 @@ ngx_rbtree_delete(ngx_rbtree_t *tree, ngx_rbtree_node_t *node)
         if (temp == temp->parent->left) {
             w = temp->parent->right;
 
+            // 情况2 兄弟节点是红色
             if (ngx_rbt_is_red(w)) {
                 ngx_rbt_black(w);
                 ngx_rbt_red(temp->parent);
                 ngx_rbtree_left_rotate(root, sentinel, temp->parent);
                 w = temp->parent->right;
             }
-
+            
+            // 情况3 兄弟节点w是黑色，w的两个儿子也是黑色。
             if (ngx_rbt_is_black(w->left) && ngx_rbt_is_black(w->right)) {
                 ngx_rbt_red(w);
                 temp = temp->parent;
 
             } else {
+                // 情况4 兄弟节点w是黑色，w的右儿子SR是黑色（左儿子SL必定是红色，参考情况3）
                 if (ngx_rbt_is_black(w->right)) {
                     ngx_rbt_black(w->left);
                     ngx_rbt_red(w);
@@ -281,6 +293,7 @@ ngx_rbtree_delete(ngx_rbtree_t *tree, ngx_rbtree_node_t *node)
                     w = temp->parent->right;
                 }
 
+                // 情况5 兄弟节点w是黑色，w右儿子SR是红色
                 ngx_rbt_copy_color(w, temp->parent);
                 ngx_rbt_black(temp->parent);
                 ngx_rbt_black(w->right);
