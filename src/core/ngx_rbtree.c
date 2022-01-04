@@ -158,10 +158,9 @@ ngx_rbtree_insert_timer_value(ngx_rbtree_node_t *temp, ngx_rbtree_node_t *node,
 }
 
 /** 
- * node 想要删除的节点
- * subst 实际删除的节点
- * 
- * 
+ * node 实际删除的节点
+ * subst node或者node的后继节点
+ * temp subst的孩子
  * w 兄弟节点
 */
 void
@@ -187,7 +186,7 @@ ngx_rbtree_delete(ngx_rbtree_t *tree, ngx_rbtree_node_t *node)
         subst = ngx_rbtree_min(node->right, sentinel);
 
         if (subst->left != sentinel) {
-            // 什么时候走到这？
+            // 有两个孩子，后继节点没有左孩子，不会走到这
             temp = subst->left;
         } else {
             temp = subst->right;
@@ -222,13 +221,14 @@ ngx_rbtree_delete(ngx_rbtree_t *tree, ngx_rbtree_node_t *node)
 
     } else {
         if (subst->parent == node) {
-            // 什么时候走到这？
+            // 什么时候走到这？temp的parent不是本来就是subst吗？
             temp->parent = subst;
 
         } else {
             temp->parent = subst->parent;
         }
 
+        // nginx这里是直接用subst替代node，而不是仅仅替换key（删除的是node而不是subst）
         subst->left = node->left;
         subst->right = node->right;
         subst->parent = node->parent;
@@ -298,10 +298,13 @@ ngx_rbtree_delete(ngx_rbtree_t *tree, ngx_rbtree_node_t *node)
                 ngx_rbt_black(temp->parent);
                 ngx_rbt_black(w->right);
                 ngx_rbtree_left_rotate(root, sentinel, temp->parent);
+                // 红黑树已修复，退出循环
                 temp = *root;
             }
 
-        } else {
+        } 
+        // 与上面是镜像，互换左右孩子和左右旋即可
+        else {
             w = temp->parent->left;
 
             if (ngx_rbt_is_red(w)) {
@@ -332,6 +335,10 @@ ngx_rbtree_delete(ngx_rbtree_t *tree, ngx_rbtree_node_t *node)
         }
     }
 
+    /**
+     * subst是黑色，temp是红色时，直接将temp染黑即可
+     * 修复完成temp是根节点，保证是黑色
+     */ 
     ngx_rbt_black(temp);
 }
 
