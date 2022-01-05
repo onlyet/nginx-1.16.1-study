@@ -202,6 +202,7 @@ ngx_monotonic_time(time_t sec, ngx_uint_t msec)
     clock_gettime(CLOCK_MONOTONIC_FAST, &ts);
 
 #elif defined(CLOCK_MONOTONIC_COARSE)
+    //  系统运行时间，从系统启动时开始计时，速度更快精度更低，系统休眠时不再计时？
     clock_gettime(CLOCK_MONOTONIC_COARSE, &ts);
 
 #else

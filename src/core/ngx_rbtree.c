@@ -403,6 +403,7 @@ ngx_rbtree_right_rotate(ngx_rbtree_node_t **root, ngx_rbtree_node_t *sentinel,
 }
 
 /**
+ * 获取后继节点
  * 如果有右子树，则后继是右子树最小节点
  * 没有右子树，则后继要往上找
  * 如果node是左孩子则后继是父节点，如果是右孩子则继续往上层找
